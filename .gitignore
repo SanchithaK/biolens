@@ -1,0 +1,10 @@
+.env
+data/raw/
+data/processed/
+*.pkl
+__pycache__/
+.DS_Store
+chroma_db/
+*.egg-info
+venv/
+
