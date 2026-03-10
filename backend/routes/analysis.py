@@ -65,3 +65,8 @@ def differential_expression(req: DERequest, db: Session = Depends(get_db)):
 
 	return { "group_a": req.group_a, "group_b": req.group_b, "total_tested": len(result_df), "significant": len(sig), "results": sig.to_dict(orient='records')}
 
+@router.post("/agent")
+def run_agent(question: str):
+    """Run the autonomous BioLens analysis agent."""
+    from agent.bio_agent import run_analysis
+    return {"question": question, "answer": run_analysis(question)}
