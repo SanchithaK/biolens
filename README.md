@@ -16,7 +16,7 @@ An end-to-end bioinformatics platform for querying, analyzing, and interpreting 
 
 | Feature | Description |
 |---|---|
-| 🗃️PostgreSQL database | 15K genes × 1,218 TCGA-BRCA samples |
+|  PostgreSQL database | 15K genes × 1,218 TCGA-BRCA samples |
 |  FastAPI REST API | Expression queries, DE analysis, pathway enrichment |
 |  Claude LLM | Natural language biological interpretation |
 |  LangChain agent | Autonomous multi-step analysis workflows |
