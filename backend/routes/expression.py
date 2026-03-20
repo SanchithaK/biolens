@@ -56,3 +56,9 @@ def top_variable_genes(n: int=Query(50, le=500), db: Session=Depends(get_db)):
 	"""
 	rows = db.execute(text(query), {"n":n}).fetchall()
 	return [dict(r._mapping) for r in rows]
+
+@router.get("/search/semantic")
+def semantic_gene_search(query: str, n:int=10):
+	""" Search for genes by biological meaning using vector similarity."""
+	from ml.embeddings import semantic_search
+	return semantic_search(query, n)

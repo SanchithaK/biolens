@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -65,8 +65,32 @@ def differential_expression(req: DERequest, db: Session = Depends(get_db)):
 
 	return { "group_a": req.group_a, "group_b": req.group_b, "total_tested": len(result_df), "significant": len(sig), "results": sig.to_dict(orient='records')}
 
+class AgentQuery(BaseModel):
+	question:str
+
 @router.post("/agent")
-def run_agent(question: str):
+def run_agent(query: AgentQuery):
     """Run the autonomous BioLens analysis agent."""
     from agent.bio_agent import run_analysis
-    return {"question": question, "answer": run_analysis(question)}
+    return {"question": query.question, "answer": run_analysis(query.question)}
+
+@router.get("/classify/{sample_id}")
+def classify_sample(sample_id: str, db: Session = Depends(get_db)):
+	"""Predict cancer subtype for a sample from its expression profile."""
+	# Get expression values for this sample
+	query = """ 
+	SELECT g.gene_symbol, e.log2_tpm
+	FROM expression e
+	JOIN genes g ON e.gene_id = g.gene_id
+	WHERE e.sample_id = :sample_id
+	"""
+	rows = db.execute(text(query), {"sample_id": sample_id}).fetchall()
+	if not rows:
+		raise HTTPException(status_code=404, detail=f"Sample {sample_id} not found")
+	
+	expression_dict = {r.gene_symbol: r.log2_tpm for r in rows}
+
+	from ml.classifier import predict
+	result = predict(expression_dict)
+	result["sample_id"] = sample_id
+	return result
